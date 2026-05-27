@@ -1,23 +1,15 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException, Depends
+from sqlalchemy.orm import Session
 from typing import Optional
 
-# Pydantic models for validation
-class BookCreate(BaseModel):
-    title: str
-    author: str
-    status: str = "want_to_read"
-    rating: Optional[int] = None
+from database import get_db, engine
+from models import Book, Base
+from schemas import BookCreate, BookUpdate, BookResponse
 
-class BookUpdate(BaseModel):
-    status: Optional[str] = None
-    rating: Optional[int] = None
+# Create tables in the database (if they don't exist yet)
+Base.metadata.create_all(bind=engine)
 
-# In-memory storage
-books_db = []
-next_id = 1
-
-app = FastAPI(title="Book Tracker API", version="1.0.0")
+app = FastAPI(title="Book Tracker API", version="2.0.0")
 
 @app.get("/")
 def read_root():
